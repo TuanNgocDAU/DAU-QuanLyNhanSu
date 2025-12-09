@@ -1,0 +1,5 @@
+{
+  "name": "Hệ thống Quản lý Nhân sự DAU",
+  "description": "Ứng dụng quản lý thông tin nhân sự trường Đại học Kiến trúc Đà Nẵng sử dụng Supabase.",
+  "requestFramePermissions": []
+}
