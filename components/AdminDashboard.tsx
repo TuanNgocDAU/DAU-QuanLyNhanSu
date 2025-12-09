@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { DanhMucChucVuManagement } from './DanhMucChucVuManagement'; // Import the new component
 import { DanhMucTrinhDoManagement } from './DanhMucTrinhDoManagement'; // Import the new DanhMucTrinhDoManagement component
+import { DanhMucPhongBanManagement } from './DanhMucPhongBanManagement'; // Import the new DanhMucPhongBanManagement component
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -229,7 +230,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         { id: 'danhMuc-trinhDo', label: 'Trình độ', icon: TrendingUp },
         { id: 'danhMuc-chucDanh', label: 'Chức danh', icon: Gem },
         { id: 'danhMuc-chucVu', label: 'Chức vụ', icon: UserCheck },
-        { id: 'danhMuc-khoaPhong', label: 'Khoa, Phòng', icon: Building2 },
+        { id: 'danhMuc-khoaPhong', label: 'Khoa, Phòng', icon: Building2 }, // Updated icon for Khoa, Phòng
         { id: 'danhMuc-namHoc', label: 'Năm học', icon: Calendar },
       ]
     },
@@ -442,13 +443,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
           ) : activeMenuItem === 'danhMuc-chucVu' ? (
             <DanhMucChucVuManagement />
-          ) : activeMenuItem === 'danhMuc-trinhDo' ? ( // New condition for Trình độ management
+          ) : activeMenuItem === 'danhMuc-trinhDo' ? (
             <DanhMucTrinhDoManagement />
-          ) : activeMenuItem.startsWith('danhMuc-') ? (
-            // Generic placeholder for other Danh mục sub-items
+          ) : activeMenuItem === 'danhMuc-khoaPhong' ? ( // New condition for Khoa, Phòng management
+            <DanhMucPhongBanManagement />
+          ) : activeMenuItem.startsWith('danhMuc-') && activeMenuItem !== 'danhMuc' ? (
+            // Generic placeholder for other Danh mục sub-items, excluding the parent 'danhMuc' itself
             <div className="flex items-center justify-center h-full text-gray-500 text-xl">
               <p>Chức năng "{menuItems.find(item => item.id === 'danhMuc')?.children?.find(child => child.id === activeMenuItem)?.label}" đang được phát triển...</p>
             </div>
+          ) : activeMenuItem === 'danhMuc' ? (
+             <div className="flex items-center justify-center h-full text-gray-500 text-xl">
+                <p>Vui lòng chọn một mục con trong "Danh mục".</p>
+             </div>
           ) : (
             // Placeholder for top-level menu items other than hoSoNhanSu
             <div className="flex items-center justify-center h-full text-gray-500 text-xl">

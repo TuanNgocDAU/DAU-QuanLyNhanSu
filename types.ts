@@ -32,6 +32,13 @@ export interface TrinhDo {
   ghichu: string;
 }
 
+export interface PhongBan {
+  id: number;
+  maphongban: string;
+  giatri: string;
+  sapxep: number; // Sắp xếp, assuming it's a number
+}
+
 export type UserType = 'admin' | 'employee' | null;
 
 export interface UserSession {
