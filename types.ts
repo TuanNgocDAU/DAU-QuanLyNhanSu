@@ -39,6 +39,20 @@ export interface PhongBan {
   sapxep: number; // Sắp xếp, assuming it's a number
 }
 
+export interface ChucDanh {
+  id: number;
+  machucdanh: string;
+  giatri: string;
+  ghichu: string;
+}
+
+export interface NamHoc {
+  id: number;
+  manamhoc: string; // Changed from namhoc
+  giatri: string;    // Changed from ghichu
+  macdinh: boolean;  // Added new field
+}
+
 export type UserType = 'admin' | 'employee' | null;
 
 export interface UserSession {

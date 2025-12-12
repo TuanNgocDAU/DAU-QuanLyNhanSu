@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { TrinhDo } from '../types';
@@ -118,7 +119,7 @@ export const DanhMucTrinhDoManagement: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý Danh mục Trình độ</h2>
+      <h2 className="text-2xl font-bold text-blue-600 bg-white p-4 mb-6 rounded-lg shadow-sm border border-gray-200">Quản lý Danh mục Trình độ</h2>
       
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
@@ -129,7 +130,7 @@ export const DanhMucTrinhDoManagement: React.FC = () => {
           <input
             type="text"
             placeholder="Tìm kiếm theo mã, giá trị hoặc ghi chú..."
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -152,11 +153,11 @@ export const DanhMucTrinhDoManagement: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Trình độ</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá Trị</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi Chú</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao Tác</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">ID</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Mã Trình độ</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Trình độ</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Ghi chú</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-red-500 tracking-wider">Hiệu chỉnh</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">

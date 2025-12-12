@@ -1,48 +1,48 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { ChucVu } from '../types';
+import { NamHoc } from '../types';
 import { Plus, Pencil, Trash2, Search, X, Save, FileDown, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx'; // Import xlsx library
 
-export const DanhMucChucVuManagement: React.FC = () => {
-  const [chucVuList, setChucVuList] = useState<ChucVu[]>([]);
+export const DanhMucNamHocManagement: React.FC = () => {
+  const [namHocList, setNamHocList] = useState<NamHoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentChucVu, setCurrentChucVu] = useState<ChucVu | null>(null);
+  const [currentNamHoc, setCurrentNamHoc] = useState<NamHoc | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalError, setModalError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const fetchChucVu = async () => {
+  const fetchNamHoc = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('DanhMucChucVu').select('*').order('id', { ascending: true });
+    const { data, error } = await supabase.from('DanhMucNamHoc').select('*').order('manamhoc', { ascending: true });
     if (error) {
-      alert('Lỗi khi tải danh mục Chức vụ: ' + error.message);
+      alert('Lỗi khi tải danh mục Năm học: ' + error.message);
     } else {
-      setChucVuList(data || []);
+      setNamHocList(data || []);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchChucVu();
+    fetchNamHoc();
   }, []);
 
-  // Tạo mã chức vụ tự động (dạng số)
-async function generateNewMaChucVu() {
+// Tạo mã năm học tự động (dạng số)
+async function generateNewNamHocCode () {
     try {
         const { data, error } = await supabase
-            .from('DanhMucChucVu')
-            .select('machucvu');
+            .from('DanhMucNamHoc')
+            .select('manamhoc');
         
         if (error) throw error;
         
         if (data && data.length > 0) {
             // Lấy tất cả mã, chuyển sang số, tìm giá trị max
             const numbers = data
-                .map(item => parseInt(item.machucvu) || 0)
+                .map(item => parseInt(item.manamhoc) || 0)
                 .filter(num => num > 0);
             
             if (numbers.length > 0) {
@@ -58,60 +58,59 @@ async function generateNewMaChucVu() {
 }
 
 
+
   const handleOpenAdd = async () => {
     setModalError(null);
     setIsEditing(false);
-    const newMaChucVu = await generateNewMaChucVu();
-    setCurrentChucVu({ id: 0, machucvu: newMaChucVu, giatri: '' }); // id will be ignored by Supabase for insert
+    const newNamHocCode = await generateNewNamHocCode();
+    setCurrentNamHoc({ id: 0, manamhoc: newNamHocCode, giatri: '', macdinh: false }); // id will be ignored by Supabase for insert
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (chucVu: ChucVu) => {
+  const handleOpenEdit = (namHoc: NamHoc) => {
     setModalError(null);
     setIsEditing(true);
-    setCurrentChucVu(chucVu);
+    setCurrentNamHoc(namHoc);
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentChucVu) return;
+    if (!currentNamHoc) return;
 
     setSaving(true);
     setModalError(null);
 
     // Validate if giatri is not empty
-    if (!currentChucVu.giatri.trim()) {
+    if (!currentNamHoc.giatri.trim()) {
       setModalError('Giá trị không được để trống.');
       setSaving(false);
       return;
     }
 
-    // Check for duplicate machucvu or giatri (only for new entries or if changed for existing)
-    // Explicitly cast to String to prevent TypeError if machucvu/giatri is not a string
-    const isMaChucVuDuplicate = chucVuList.some(cv => 
-        String(cv.machucvu || '') === String(currentChucVu.machucvu || '') && (!isEditing || cv.id !== currentChucVu.id)
+    // Check for duplicate manamhoc or giatri (only for new entries or if changed for existing)
+    const isMaNamHocDuplicate = namHocList.some(nh => 
+        String(nh.manamhoc || '').toLowerCase().trim() === String(currentNamHoc.manamhoc || '').toLowerCase().trim() && (!isEditing || nh.id !== currentNamHoc.id)
     );
-    const isGiaTriDuplicate = chucVuList.some(cv => 
-        String(cv.giatri || '').toLowerCase().trim() === String(currentChucVu.giatri || '').toLowerCase().trim() && (!isEditing || cv.id !== currentChucVu.id)
+    const isGiaTriDuplicate = namHocList.some(nh => 
+        String(nh.giatri || '').toLowerCase().trim() === String(currentNamHoc.giatri || '').toLowerCase().trim() && (!isEditing || nh.id !== currentNamHoc.id)
     );
 
-    //if (isMaChucVuDuplicate) {
-    //    setModalError('Mã chức vụ đã tồn tại. Vui lòng chọn mã khác.');
-    //    setSaving(false);
-    //    return;
-    //}
-
-    if (isGiaTriDuplicate) {
-        setModalError('Giá trị chức vụ đã tồn tại. Vui lòng nhập giá trị khác.');
+    if (isMaNamHocDuplicate) {
+        setModalError('Mã năm học đã tồn tại. Vui lòng chọn mã khác.');
         setSaving(false);
         return;
     }
-
+    if (isGiaTriDuplicate) {
+        setModalError('Giá trị năm học đã tồn tại. Vui lòng nhập giá trị khác.');
+        setSaving(false);
+        return;
+    }
+    
     if (isEditing) {
-      const { id, ...updates } = currentChucVu; // Exclude ID from updates payload
+      const { id, ...updates } = currentNamHoc; // Exclude ID from updates payload
       const { error } = await supabase
-        .from('DanhMucChucVu')
+        .from('DanhMucNamHoc')
         .update(updates)
         .eq('id', id);
 
@@ -119,59 +118,63 @@ async function generateNewMaChucVu() {
         setModalError('Cập nhật thất bại: ' + error.message);
       } else {
         setIsModalOpen(false);
-        fetchChucVu();
+        fetchNamHoc();
       }
     } else {
       // Add new
-      const { error } = await supabase.from('DanhMucChucVu').insert([currentChucVu]);
+      const { error } = await supabase.from('DanhMucNamHoc').insert([currentNamHoc]);
       if (error) {
         setModalError('Thêm mới thất bại: ' + error.message);
       } else {
         setIsModalOpen(false);
-        fetchChucVu();
+        fetchNamHoc();
       }
     }
     setSaving(false);
   };
 
-  const handleDelete = async (id: number, machucvu: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa chức vụ ${machucvu} này không?`)) {
-      const { error } = await supabase.from('DanhMucChucVu').delete().eq('id', id);
+  const handleDelete = async (id: number, manamhoc: string) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa năm học ${manamhoc} này không?`)) {
+      const { error } = await supabase.from('DanhMucNamHoc').delete().eq('id', id);
       if (error) {
         alert('Xóa thất bại: ' + error.message);
       } else {
-        fetchChucVu();
+        fetchNamHoc();
       }
     }
   };
 
   const handleExportExcel = () => {
-    const dataToExport = filteredChucVu.map(cv => ({
-      ID: cv.id,
-      'Mã Chức vụ': cv.machucvu,
-      'Giá Trị': cv.giatri,
+    const dataToExport = filteredNamHoc.map(nh => ({
+      ID: nh.id,
+      'Mã Năm học': nh.manamhoc,
+      'Giá Trị': nh.giatri,
+      'Mặc định': nh.macdinh ? 'Có' : 'Không',
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "DanhMucChucVu");
+    XLSX.utils.book_append_sheet(wb, ws, "DanhMucNamHoc");
 
-    XLSX.writeFile(wb, "DanhMucChucVu.xlsx");
+    XLSX.writeFile(wb, "DanhMucNamHoc.xlsx");
   };
 
-  const filteredChucVu = chucVuList.filter(cv => {
-    if (!cv) return false; // Ensure cv itself is not null/undefined
-    const maChucVu = String(cv.machucvu || '').toLowerCase();
-    const giaTri = String(cv.giatri || '').toLowerCase();
+  const filteredNamHoc = namHocList.filter(nh => {
+    if (!nh) return false;
+    const maNamHoc = String(nh.manamhoc || '').toLowerCase();
+    const giaTri = String(nh.giatri || '').toLowerCase();
+    const macDinh = nh.macdinh ? 'có' : 'không'; // Convert boolean to string for search
+
     const lowerSearchTerm = searchTerm.toLowerCase();
   
-    return maChucVu.includes(lowerSearchTerm) || 
-           giaTri.includes(lowerSearchTerm);
+    return maNamHoc.includes(lowerSearchTerm) || 
+           giaTri.includes(lowerSearchTerm) ||
+           macDinh.includes(lowerSearchTerm);
   });
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold text-blue-600 bg-white p-4 mb-6 rounded-lg shadow-sm border border-gray-200">Quản lý Danh mục Chức vụ</h2>
+      <h2 className="text-2xl font-bold text-blue-600 bg-white p-4 mb-6 rounded-lg shadow-sm border border-gray-200">Quản lý Danh mục Năm học</h2>
       
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
@@ -181,7 +184,7 @@ async function generateNewMaChucVu() {
           </div>
           <input
             type="text"
-            placeholder="Tìm kiếm theo mã hoặc giá trị..."
+            placeholder="Tìm kiếm theo mã, giá trị hoặc mặc định..."
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -212,31 +215,33 @@ async function generateNewMaChucVu() {
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">ID</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Mã Chức vụ</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Chức vụ</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Mã Năm học</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Năm học</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Mặc định</th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-red-500 tracking-wider">Hiệu chỉnh</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">Đang tải dữ liệu...</td>
+                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-500">Đang tải dữ liệu...</td>
                 </tr>
-              ) : filteredChucVu.length === 0 ? (
+              ) : filteredNamHoc.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">Không tìm thấy chức vụ nào.</td>
+                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-500">Không tìm thấy năm học nào.</td>
                 </tr>
               ) : (
-                filteredChucVu.map((cv) => (
-                  <tr key={cv.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cv.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{cv.machucvu}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{cv.giatri}</td>
+                filteredNamHoc.map((nh) => (
+                  <tr key={nh.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{nh.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{nh.manamhoc}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{nh.giatri}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{nh.macdinh ? 'Có' : 'Không'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleOpenEdit(cv)} className="text-indigo-600 hover:text-indigo-900 mr-4">
+                      <button onClick={() => handleOpenEdit(nh)} className="text-indigo-600 hover:text-indigo-900 mr-4">
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button onClick={() => handleDelete(cv.id, cv.machucvu)} className="text-red-600 hover:text-red-900">
+                      <button onClick={() => handleDelete(nh.id, nh.manamhoc)} className="text-red-600 hover:text-red-900">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
@@ -249,7 +254,7 @@ async function generateNewMaChucVu() {
       </div>
 
       {/* Modal Form for Add/Edit */}
-      {isModalOpen && currentChucVu && (
+      {isModalOpen && currentNamHoc && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
@@ -257,7 +262,7 @@ async function generateNewMaChucVu() {
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="flex justify-between items-center mb-5 border-b pb-2">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      {isEditing ? 'Hiệu chỉnh Chức vụ' : 'Thêm mới Chức vụ'}
+                      {isEditing ? 'Hiệu chỉnh Năm học' : 'Thêm mới Năm học'}
                     </h3>
                     <button type="button" onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-500">
                       <X className="h-6 w-6" />
@@ -266,25 +271,36 @@ async function generateNewMaChucVu() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Mã Chức vụ</label>
+                      <label className="block text-sm font-medium text-gray-700">Mã Năm học</label>
                       <input 
                         type="text" 
                         required 
-                        disabled={true} // machucvu is always readonly (non-editable)
-                        value={currentChucVu.machucvu} 
-                        onChange={e => setCurrentChucVu({...currentChucVu, machucvu: e.target.value})} 
+                        disabled={true} // manamhoc is always readonly (non-editable)
+                        value={currentNamHoc.manamhoc} 
+                        onChange={e => setCurrentNamHoc({...currentNamHoc, manamhoc: e.target.value})} 
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100" 
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Chức vụ</label>
+                      <label className="block text-sm font-medium text-gray-700">Năm học</label>
                       <input 
                         type="text" 
                         required 
-                        value={currentChucVu.giatri} 
-                        onChange={e => setCurrentChucVu({...currentChucVu, giatri: e.target.value})} 
+                        value={currentNamHoc.giatri} 
+                        onChange={e => setCurrentNamHoc({...currentNamHoc, giatri: e.target.value})} 
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
                       />
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="macdinh"
+                        name="macdinh"
+                        type="checkbox"
+                        checked={currentNamHoc.macdinh}
+                        onChange={e => setCurrentNamHoc({...currentNamHoc, macdinh: e.target.checked})}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="macdinh" className="ml-2 block text-sm font-medium text-gray-700">Mặc định</label>
                     </div>
                   </div>
 

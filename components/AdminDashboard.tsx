@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { EmployeeAccount } from '../types';
@@ -10,6 +11,8 @@ import {
 import { DanhMucChucVuManagement } from './DanhMucChucVuManagement'; // Import the new component
 import { DanhMucTrinhDoManagement } from './DanhMucTrinhDoManagement'; // Import the new DanhMucTrinhDoManagement component
 import { DanhMucPhongBanManagement } from './DanhMucPhongBanManagement'; // Import the new DanhMucPhongBanManagement component
+import { DanhMucChucDanhManagement } from './DanhMucChucDanhManagement'; // Import the new DanhMucChucDanhManagement component
+import { DanhMucNamHocManagement } from './DanhMucNamHocManagement'; // Import the new DanhMucNamHocManagement component
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -204,11 +207,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     }
   };
 
-  const filteredEmployees = employees.filter(emp => 
-    emp.ten.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    emp.holot.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.taikhoan.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEmployees = employees.filter(emp => {
+    if (!emp) return false; // Ensure employee object itself is not null/undefined
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return String(emp.ten || '').toLowerCase().includes(lowerSearchTerm) || 
+           String(emp.holot || '').toLowerCase().includes(lowerSearchTerm) ||
+           String(emp.taikhoan || '').toLowerCase().includes(lowerSearchTerm);
+  });
 
   const menuItems = [
     { id: 'hoSoNhanSu', label: 'Hồ sơ nhân sự', icon: FolderCog },
@@ -360,7 +365,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <input
                     type="text"
                     placeholder="Tìm kiếm theo tên hoặc tài khoản..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -447,6 +452,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <DanhMucTrinhDoManagement />
           ) : activeMenuItem === 'danhMuc-khoaPhong' ? ( // New condition for Khoa, Phòng management
             <DanhMucPhongBanManagement />
+          ) : activeMenuItem === 'danhMuc-chucDanh' ? ( // New condition for Chức danh management
+            <DanhMucChucDanhManagement />
+          ) : activeMenuItem === 'danhMuc-namHoc' ? ( // New condition for Nam Hoc management
+            <DanhMucNamHocManagement />
           ) : activeMenuItem.startsWith('danhMuc-') && activeMenuItem !== 'danhMuc' ? (
             // Generic placeholder for other Danh mục sub-items, excluding the parent 'danhMuc' itself
             <div className="flex items-center justify-center h-full text-gray-500 text-xl">

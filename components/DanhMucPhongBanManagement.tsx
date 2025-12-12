@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { PhongBan } from '../types';
@@ -16,7 +17,7 @@ export const DanhMucPhongBanManagement: React.FC = () => {
 
   const fetchPhongBan = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('DanhMucPhongBan').select('*').order('id', { ascending: true });
+    const { data, error } = await supabase.from('DanhMucPhongBan').select('*').order('sapxep', { ascending: true }).order('id', { ascending: true });
     if (error) {
       alert('Lỗi khi tải danh mục Khoa, Phòng: ' + error.message);
     } else {
@@ -29,23 +30,34 @@ export const DanhMucPhongBanManagement: React.FC = () => {
     fetchPhongBan();
   }, []);
 
-  const generateNewMaPhongBan = async () => {
-    const { data, error } = await supabase.from('DanhMucPhongBan').select('maphongban');
-    if (error) {
-      console.error('Error fetching existing maphongban:', error.message);
-      return 'PB001'; // Default fallback
+  // Tạo mã Phòng ban tự động (dạng số)
+async function generateNewMaPhongBan () {
+    try {
+        const { data, error } = await supabase
+            .from('DanhMucPhongBan')
+            .select('maphongban');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            // Lấy tất cả mã, chuyển sang số, tìm giá trị max
+            const numbers = data
+                .map(item => parseInt(item.maphongban) || 0)
+                .filter(num => num > 0);
+            
+            if (numbers.length > 0) {
+                const newNum = Math.max(...numbers);
+                return String(newNum + 1);
+            }
+        }
+        return '1';
+    } catch (err) {
+        console.error('Lỗi tạo mã:', err);
+        return '1';
     }
+}
 
-    const existingCodes = data
-      .map(item => String(item.maphongban || '')) // Ensure it's a string, converting null/undefined to ''
-      .filter(code => code.startsWith('PB') && !isNaN(parseInt(code.substring(2))))
-      .map(code => parseInt(code.substring(2)));
-
-    const maxNum = existingCodes.length > 0 ? Math.max(...existingCodes) : 0;
-    const newNum = maxNum + 1;
-    return `PB${String(newNum).padStart(3, '0')}`;
-  };
-
+ 
   const handleOpenAdd = async () => {
     setModalError(null);
     setIsEditing(false);
@@ -83,11 +95,12 @@ export const DanhMucPhongBanManagement: React.FC = () => {
         String(pb.giatri || '').toLowerCase().trim() === String(currentPhongBan.giatri || '').toLowerCase().trim() && (!isEditing || pb.id !== currentPhongBan.id)
     );
 
-    if (isMaPhongBanDuplicate) {
-        setModalError('Mã phòng ban đã tồn tại. Vui lòng chọn mã khác.');
-        setSaving(false);
-        return;
-    }
+    //if (isMaPhongBanDuplicate) {
+    //    setModalError('Mã phòng ban đã tồn tại. Vui lòng chọn mã khác.');
+    //    setSaving(false);
+    //    return;
+    //}
+    
     if (isGiaTriDuplicate) {
         setModalError('Giá trị phòng ban đã tồn tại. Vui lòng nhập giá trị khác.');
         setSaving(false);
@@ -161,7 +174,7 @@ export const DanhMucPhongBanManagement: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý Danh mục Khoa, Phòng</h2>
+      <h2 className="text-2xl font-bold text-blue-600 bg-white p-4 mb-6 rounded-lg shadow-sm border border-gray-200">Quản lý Danh mục Khoa, Phòng</h2>
       
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
@@ -172,7 +185,7 @@ export const DanhMucPhongBanManagement: React.FC = () => {
           <input
             type="text"
             placeholder="Tìm kiếm theo mã, giá trị hoặc sắp xếp..."
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -201,11 +214,11 @@ export const DanhMucPhongBanManagement: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Phòng ban</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá Trị</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sắp Xếp</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao Tác</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">ID</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Mã Khoa/Phòng</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Khoa/Phòng</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-red-500 tracking-wider">Sắp xếp</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-red-500 tracking-wider">Hiệu chỉnhc</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -262,14 +275,14 @@ export const DanhMucPhongBanManagement: React.FC = () => {
                       <input 
                         type="text" 
                         required 
-                        disabled={isEditing} // maphongban is readonly when editing
+                        disabled={true} // maphongban is always readonly
                         value={currentPhongBan.maphongban} 
                         onChange={e => setCurrentPhongBan({...currentPhongBan, maphongban: e.target.value})} 
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100" 
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Giá Trị</label>
+                      <label className="block text-sm font-medium text-gray-700">Tên đơn vị mới</label>
                       <input 
                         type="text" 
                         required 
