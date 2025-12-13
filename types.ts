@@ -1,3 +1,4 @@
+
 export interface AdminAccount {
   taikhoan: string;
   matkhau: string;
@@ -17,6 +18,45 @@ export interface EmployeeAccount {
   email: string;
   duongdan: string; // Image URL
   thoihan: string; // YYYY-MM-DD
+}
+
+// New Interface for DanhSachNhanVien
+export interface NhanVien {
+  Id: number;
+  manv: string;
+  holot: string;
+  ten: string;
+  gioitinh: boolean;
+  ngaysinh: string;
+  noisinh: string;
+  nguyenquan: string;
+  noiohiennay: string;
+  sodtdd: string;
+  trinhdo: string; // Mã trình độ
+  chucdanh: string; // Mã chức danh
+  ngaychinhthuc: string;
+  phongban: string; // Mã phòng ban
+  chucvu: string; // Mã chức vụ
+  socccd: string;
+  ngaycap: string;
+  noicap: string;
+  danghiviec: boolean;
+  email: string;
+  giangvien: boolean;
+  vithu: number;
+  ngaythuviec: string;
+  ngayqdtrogiang: string;
+  ngayqdgiangvien: string;
+  thoigiannghiviec: string;
+  hinhanh: string;
+  matkhau: string;
+  hieuluc: string;
+  
+  // Optional fields for display after join
+  ten_trinhdo?: string;
+  ten_phongban?: string;
+  ten_chucvu?: string;
+  ten_chucdanh?: string;
 }
 
 export interface ChucVu {
